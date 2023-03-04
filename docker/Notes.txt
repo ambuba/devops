@@ -1,0 +1,30 @@
+*** Need For Docker ***
+
+- Compatibility/Depnendency Management
+- Long Setup Times
+- Different Dev/Test/Prod Environments
+
+*** What Docker Does ***
+
+- Package & Containerize Apps (Containers - Completely isolated environments)
+- Containers are lightweight
+- Run each service with its own dependencies in separate containers
+- Image - Package / Template used to create a container
+- Container - an instance of running and isolated image with its own dependencies
+- A container only lives as long as the process within it is running. Once finished, the container exits
+
+*** Docker Commands
+
+> docker run                    #Start a container 
+> docker ps  {-a}               #List all running containers  
+> docker stop silly_samet       #Stop a container
+> docker rm silly_samet         #Permanently remove a container
+> docker images                 #List available or downloaded images on the host
+> docker rmi nginx              #Remove the NGINX image. Ensure all dependent containers are deleted first
+> docker pull redis             #Only pull/download the image from registry but don't run it
+> docker run -it centos bash    #Execute a command on a running docker container
+> docker run ubuntu sleep 5     #Execute a command when running a container
+> docker run webapp             #Running command t\like this runs it in attached mode (Foreground)
+> docker run -d webapp          #Runs in detached mode (Background) - Note the ID assigned "a043d40..."
+> docker attach a043d           #ARe-attach to a detached container running in the background
+> docker exec a043d cat /etc/   #Execute a command on a running container
