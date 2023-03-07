@@ -1,3 +1,10 @@
+*** Resources 
+
+https://docs.docker.com/compose/
+https://docs.docker.com/engine/reference/commandline/compose/
+https://github.com/dockersamples/example-voting-app
+
+
 *** Need For Docker ***
 
 - Compatibility/Depnendency Management
@@ -15,16 +22,116 @@
 
 *** Docker Commands
 
-> docker run                    #Start a container 
-> docker ps  {-a}               #List all running containers  
-> docker stop silly_samet       #Stop a container
-> docker rm silly_samet         #Permanently remove a container
-> docker images                 #List available or downloaded images on the host
-> docker rmi nginx              #Remove the NGINX image. Ensure all dependent containers are deleted first
-> docker pull redis             #Only pull/download the image from registry but don't run it
-> docker run -it centos bash    #Execute a command on a running docker container
-> docker run ubuntu sleep 5     #Execute a command when running a container
-> docker run webapp             #Running command t\like this runs it in attached mode (Foreground)
-> docker run -d webapp          #Runs in detached mode (Background) - Note the ID assigned "a043d40..."
-> docker attach a043d           #ARe-attach to a detached container running in the background
-> docker exec a043d cat /etc/   #Execute a command on a running container
+> docker run                                        #Start a container 
+> docker ps  {-a}                                   #List all running containers  
+> docker stop silly_samet                           #Stop a container
+> docker rm silly_samet                             #Permanently remove a container
+> docker images                                     #List available or downloaded images on the host
+> docker rmi nginx                                  #Remove the NGINX image. Ensure all dependent containers are deleted first
+> docker image prune -a                             #Remove all images
+> docker pull redis                                 #Only pull/download the image from registry but don't run it
+> docker run -it centos bash                        #Execute a command on a running docker container
+> docker run ubuntu sleep 5                         #Execute a command when running a container
+> docker run webapp                                 #Running command t\like this runs it in attached mode (Foreground)
+> docker run -d webapp                              #Runs in detached mode (Background) - Note the ID assigned "a043d40..."
+> docker attach a043d                               #Re-attach to a detached container running in the background
+> docker exec a043d cat /etc/                       #Execute a command on a running container
+> docker run redis:4.0                              #Run a specific version of image - use of tags. If no tag is specified, the default is the latest version
+> docker run -i web-app                             #Run interactively. Can accept user input but doesn't prompt
+> docker run -it web-app                            #Run interactively with a container's pesudo terminal for prompts
+> docker run -p 80:5000 webapp                      #Port mapping - Map a port on the docker host to aport on the container to allow external acess
+> docker run -v /var/lib:/var/lib/mysql mysql       #Volume mapping - Map a volume on the docker host to a volume within the container for persistence
+> docker inspect container_name                     #Detailed inspection of a container
+> docker log container_name or id                   #See container logs
+> docker history image_name                         #Track history/activity/changes
+> docker run -e APP_COLOR=blue web-app              #Set an environment variable
+> docker run --entrypoint xxx                       #Override the default entry point and arguments specified in the build file 
+> docker run -d --name=redis redis                  #Naming a container - Important!
+> docker run --cpus=.5 ubuntu                       #Restrict CPU utilization on underlying Docker host to 50%
+> docker run --memory=100m redis                    #Restrict memory utilization
+> docker info                                       #Display information regarding the docker installation
+> docker system df     {-v}                         #Check actual utilization by docker images
+
+
+*** Docker Images
+
+- Can't find an existing image/service that you Need
+- You need to dockerize your application for ease of shipping and deployment
+- Docker builds images in a layered architecture
+- Layering also helps to rebuild from failed steps wihtout needing to build all from scratch again
+- Layers are cached
+- If changes are introduced in your image, the rebuild process is faster - Only layers above the updated layer needs rebuild
+
+*** Steps
+
+1. Define your application requirements in a docker file
+2. Build your image using Docker's build command
+
+> docker build . -f dockerfile -t my-custom-app        #Creates an application image locally on your host
+> docker push my-custom-app                            #Push the image to the docker registry/repository 
+
+
+*** Docker Compose
+
+- Define configurations in YAML fileto make it easier to manage deployments
+- Links are used to link/associate two containers together
+- Can also use docker compose-build to build other dependencies within the config first
+- Steps - Install Docker Compose, Create Compose File, Run Docker Compose
+
+> docker run -d --name=app -p 20:80 --link redis:redis vote-app                 #Demonstrate linking
+> docker-compose up                                                             #Bring up the application stack
+
+
+*** Docker Registry
+
+- A central respository of all docker images
+- Format: name/image (e.g. nginx/nginx) - First portion is the username (defaults to image name if not specified), secodn portion is the image
+- When image source/location is not specified, it's assumed to be docker hub/registry (docker.io)
+- Registries can either be public or private
+- Also possible to deploy own private registry e.g. on-prem
+
+> docker login private-registry.io                  #Login to your private/public registry first - to be able to push images to the registry
+
+*** Deploying a Custom Registry Server
+
+> docker run -d -p 5000:5000 --restart=always --name my-registry registry:2     #Note 'registry:2' is the image
+> docker pull nginx:latest                                                      #Pull image from docker*
+> docker image tag nginx:latest localhost:5000/nginx:latest                     #Tag before pushing*
+> docker push localhost:5000/nginx:latest                                       #Push to our local custom registry
+
+
+*** Docker Engine, Storage & Networking
+
+- Docker Engine - Docker Daemon, REST API, Docker Compatibility
+- Docker Daemon - Background process that manages Docker objects - e.g. Images, Container, Volumes & Networks
+- REST API - API interface that apps/services can use to leverage the daemon
+- Docker CLI uses the REST API to interact with the Docker daemon ( Can exist of a separate host)
+- You would then specify the docker host when running commands via CLI as below
+
+> docker -H=10.0.0.8:2375 run nginx
+
+- Docker uses namespaces to isolate workspace - PID, Containers, Networking etc.
+- Filesystem - /var/lib/docker
+- Storage drivers enable all this - AUFS, ZFS, BTRFS, Device Mapper, Overlay
+
+> docker volume create data_volume                  #Create a volume on docker host to persist storage when a container exits
+> docker run -v data_volume:/var/lib/mysql mysql    #Mount the created host volume into the running container
+> docker run -v /data/mysql:/var/lib/mysql mysql    #Use a different non-default location on Docker host (Bind Mounting)
+> docker run -v data_volume2:/var/lib/mysql mysql   #Create and mount the volume simultaneously
+
+> docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql               #New syntax
+
+- Default networks - Bridge, Host, None
+- Containers get attached to bridged network by default
+- You can specify a different network
+- Docker has an inbuilt dns that helps containers resolve names of the host they connect to
+
+> docker run ubuntu --network=host
+> docker network create --driver bridge --subnet 10.0.0.0/24 custom-network                 #Create custom bridge network
+> docker ls network                                                                         #List all the networks
+
+
+*** Container Orchestration Introduction
+
+- Public docker registry - dockerhub
+- Container orchestration tools/solutions - Docker Swarm (From Docker), Kubernetes (From Google), MESOS (From APACHE)
