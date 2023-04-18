@@ -1,0 +1,26 @@
+*** Introduction
+
+- Challenges of traditional IT infrastructure - slow deployment, expensive, limited automation, human errors, inconsistencies, wasted resources
+- Infrastructure as Code (IaC) - Codifying infrastructure provisioning process
+- Common IaC tools - Docker, ansible, terraform, cloudformation, vagrant, puppet, packer, saltstack
+- Configuration management - Ansible, Chef, Puppet, saltstack
+- Server templating - Docker, HashiCorp Packer, HashiCorp vagrant
+- Provisioning tools - terraform, cloudformation
+- Terraform is vendor-agnostic
+- Terraform uses HCL - HashiCorp Configuration Language
+- HCL is a declarative language
+
+*** Terraform Stages
+
+- Init - Terraform initializes and identifies the target providers to be used in each case
+- Plan - Terraform drafts a plan to get to the target state
+- Apply - Terraform makes the necessary changes on the target to bring it to the desired state
+- Every component managed by Terraform is called a resource
+- Terraform manages the lifecycle of a resource from its provisioning to configuration and finally to decommissioning
+
+
+*** HCL Basics
+
+- Contains blocks and arguments
+- Block - contains information about the infrastructure platform and a set of resources within that platform that we need to create
+- Each resource type has specific arguments that it expects
